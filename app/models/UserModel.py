@@ -33,15 +33,13 @@ class UserModel(Model):
 
     def register_user(self, user_info):
         errors = []
-        # Do some validations Here
-        #['name','username','email','pwd','pwdc','date']
         if len(user_info['name']) < 3:
             errors.append('name and username must be at least 3 characters')
         if len(user_info['username']) < 3:
             errors.append('name and username must be at least 3 characters')
         PASS_REGEX = re.compile('^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$')
         if not PASS_REGEX.match(user_info['pwd']):
-            errors.append('Password must contain character and be a minimum of 8 characters')
+            errors.append('Password must contain a number and be a minimum of 8 characters')
         EMAIL_REGEX = re.compile('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$')
         if not EMAIL_REGEX.match(user_info['email']):
             errors.append('Must provide a valid email address')
@@ -55,13 +53,14 @@ class UserModel(Model):
             'name' : user_info['name'],
             'alias' : user_info['username'],
             'email' : user_info['email'],
-            # 'dob' : str(user_info['date']),
             'password' : pw_hash
         }
-
-        # FIX DATE!!!
-        # query_register = 'INSERT INTO users (name, username, date, password)VALUE(:name, :username, :date, :password)'
-        query_register = 'INSERT INTO users (name, alias, email, password)VALUE(:name, :alias, :email,:password)'
+        query_check = 'SELECT * FROM users WHERE users.email = :email '
+        check = self.db.query_db(query_check, new_user_data)
+        if len(check) != 0:
+            errors.append('This email already exists')
+            return errors
+        query_register = 'INSERT INTO users (name, alias, email, password)VALUE(:name, :alias, :email, :password)'
 
         ## Check before this to be sure its not a duplicate
         id = self.db.query_db(query_register,new_user_data)

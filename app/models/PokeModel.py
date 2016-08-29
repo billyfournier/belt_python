@@ -18,7 +18,6 @@ class PokeModel(Model):
 
     def who_poked_me(self, user_id):
         #order by # of times they poked me
-        print user_id, '8'* 40
         query =  'SELECT users.alias, COUNT(users.alias) as poke_count from pokes '
         query += 'JOIN users on users.id = pokes.users_tx_id '
         query += 'WHERE pokes.users_rx_id = :id '
